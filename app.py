@@ -10,6 +10,7 @@ import random
 #from dotenv import load_dotenv
 import os
 import urllib
+import plotly.express as px
 
 
 #load_dotenv()
@@ -74,23 +75,32 @@ def get_file_content_as_string(path):
 st.title("🌍 Bicimad Predictor")
 
 travel_data = load_data()
+stations_data= pd.read_csv('bases_bicimad.csv', sep=";")
+stations_data.rename(columns={'Longitud':'longitude','Latitud':'latitude'},inplace=True)
 
 # # Calculate the timerange for the slider
 min_ts = travel_data["id"].min()
 max_ts = travel_data["id"].max()
 
+
 st.sidebar.subheader("Inputs")
-min_selection, max_selection = st.sidebar.slider(
-    "Timeline", min_value=min_ts, max_value=max_ts, value=[min_ts, max_ts]
-)
+# min_selection, max_selection = st.sidebar.slider(
+#     "Timeline", min_value=min_ts, max_value=max_ts
+# )
 
 # Toggles for the feature selection in sidebar
-show_heatmap = st.sidebar.checkbox("Show Heatmap")
-show_histograms = st.sidebar.checkbox("Show Histograms")
-show_images = st.sidebar.checkbox("Show Images")
-images_count = st.sidebar.number_input("Images to Show", value=10)
-show_detailed_months = st.sidebar.checkbox("Show Detailed Split per Year")
-show_code = st.sidebar.checkbox("Show Code")
+# show_heatmap = st.sidebar.checkbox("Show Heatmap")
+# show_histograms = st.sidebar.checkbox("Show Histograms")
+# show_images = st.sidebar.checkbox("Show Images")
+
+minute_selected =st.sidebar.selectbox('Select minute', range(1,60))
+hour_selected =st.sidebar.selectbox('Select hour', range(0,24))
+day_selected =st.sidebar.selectbox('Select day', range(1,31))
+month_selected =st.sidebar.selectbox('Select month', ['January','February','March','June','July','August','September','October','November','December'])
+station_selected =st.sidebar.selectbox('Select your station', stations_data['Número'])
+
+#show_detailed_months = st.sidebar.checkbox("Show Detailed Split per Year")
+# show_code = st.sidebar.checkbox("Show Code")
 
 # # Filter Data based on selection
 # st.write(f"Filtering between {min_selection.date()} & {max_selection.date()}")
@@ -99,8 +109,15 @@ show_code = st.sidebar.checkbox("Show Code")
 # ]
 # st.write(f"Data Points: {len(travel_data)}")
 
-# # Plot the GPS coordinates on the map
-# st.map(travel_data)
+# Plot the GPS coordinates on the map
+
+st.metric(label="Station", value=(stations_data[stations_data['Número']==station_selected]['Direccion']).values[0], delta="1.2 °F")
+
+st.map(stations_data[stations_data['Número']==station_selected])
+
+px.scatter_geo(stations_data[stations_data['Número']==station_selected], lon='longitude',lat='latitude')
+
+
 
 # if show_histograms:
 #     # Plot the histograms based on the dates of data points
