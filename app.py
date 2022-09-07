@@ -1,9 +1,9 @@
 import streamlit as st
 import pandas as pd
-from datetime import datetime
+#from datetime import datetime
 #from folium.plugins import HeatMap
 import folium
-#from streamlit_folium import folium_static
+from streamlit_folium import folium_static
 import matplotlib.pyplot as plt
 #import flickrapi
 import random
@@ -11,6 +11,9 @@ import random
 import os
 import urllib
 import plotly.express as px
+import requests
+import datetime
+from PIL import Image
 
 
 #load_dotenv()
@@ -18,167 +21,118 @@ import plotly.express as px
 #set page layout
 st.set_page_config(
     page_title="BiciMad Predictor",
-    page_icon="🌍",
-    layout="wide",
-    initial_sidebar_state="expanded",
-)
-
-
-
+    page_icon="bike",
+    layout="wide")
 
 @st.cache
 def load_data():
     """ Load the cleaned data with latitudes, longitudes & timestamps """
-    df = pd.read_csv("three_years_weather.csv")
+    df = pd.read_csv("station_1.csv")
     df['id']=pd.to_datetime(df['id'], format='%Y-%m-%d %H:%M:%S', errors='ignore',exact=True)
     #travel_log["date"] = pd.to_datetime(travel_log["ts"])
     return df
 
 
-# def get_pics_from_location(locations_df, size=10):
-#     """ Get images from flickr using the gps coordinates"""
-#     api_key = os.getenv("FLICKR_API_KEY")
-#     api_secret = os.getenv("FLICKR_API_SECRET")
-#     flickr = flickrapi.FlickrAPI(api_key, api_secret, format="parsed-json")
-#     urls = []
 
-#     for index, row in locations_df.iterrows():
-#         try:
-#             photos = flickr.photos.search(
-#                 lat=row["latitude"], lon=row["longitude"], per_page=10, pages=1
-#             )
-#             # Get a random image from the set of images
-#             choice_max = min(size - 1, int(photos["photos"]["total"]))
-#             selection = random.randint(0, choice_max)
-#             selected_photo = photos["photos"]["photo"][selection]
+tab1, tab2= st.tabs(["Product", "Team"])
 
-#             # Compute the url for the image
-#             url = f"https://live.staticflickr.com/{selected_photo['server']}/{selected_photo['id']}_{selected_photo['secret']}_w.jpg"
-#             urls.append(url)
-#         except Exception as e:
-#             print(e)
-#             continue
-#     return urls
+with tab1:
+
+    st.title("BiciMad Predictor")
 
 
-@st.cache(show_spinner=False)
-def get_file_content_as_string(path):
-    """ Download a single file and make its content available as a string"""
-    url = (
-        "https://raw.githubusercontent.com/nithishr/streamlit-data-viz-demo/main/"
-        + path
-    )
-    response = urllib.request.urlopen(url)
-    return response.read().decode("utf-8")
+    travel_data = load_data()
 
 
-st.title("🌍 Bicimad Predictor")
+    stations_data= pd.read_csv('bases_bicimad.csv', sep=";")
+    stations_data.rename(columns={'Longitud':'longitude','Latitud':'latitude'},inplace=True)
 
-travel_data = load_data()
-stations_data= pd.read_csv('bases_bicimad.csv', sep=";")
-stations_data.rename(columns={'Longitud':'longitude','Latitud':'latitude'},inplace=True)
+    # Calculate the timerange for the slider
+    min_ts = travel_data["id"].min()
+    max_ts = travel_data["id"].max()
 
-# # Calculate the timerange for the slider
-min_ts = travel_data["id"].min()
-max_ts = travel_data["id"].max()
+    now = datetime.datetime.now()
+    date=now.date()
+    time=now.time()
+    name_test='Puerta del Sol B'
 
 
-st.sidebar.subheader("Inputs")
-# min_selection, max_selection = st.sidebar.slider(
-#     "Timeline", min_value=min_ts, max_value=max_ts
-# )
+    #new_row need to be updated by information from the station
+        #number, light, total_bases, longitude, latitude, weather,
 
-# Toggles for the feature selection in sidebar
-# show_heatmap = st.sidebar.checkbox("Show Heatmap")
-# show_histograms = st.sidebar.checkbox("Show Histograms")
-# show_images = st.sidebar.checkbox("Show Images")
+    # new_row={'activate':1, 'name':name, 'reservations_count':0, 'light':0, 'total_bases':30,
+    #     'free_bases':28, 'number':'1b', 'longitude':-3.701603, 'no_available':0, 'address':'Puerta del Sol nº 1',
+    #     'latitude':-3.701603, 'dock_bikes':0, 'id':(str(date)+'T'+str(time)), 'time':time, 'date':date, 'holidays':holiday, 'datetime':datetime,
+    #     'feels_like':17.44, 'weather_main':'Rain', 'weekday':weekday, 'year':year, 'month':month, 'hour_sin':hour_sin,
+    #     'hour_cos':hour_cos, 'weekday_sin':weekday_sin, 'weekday_cos':weekday_cos, 'month_sin':month_sin, 'month_cos':month_cos}
 
-minute_selected =st.sidebar.selectbox('Select minute', range(1,60))
-hour_selected =st.sidebar.selectbox('Select hour', range(0,24))
-day_selected =st.sidebar.selectbox('Select day', range(1,31))
-month_selected =st.sidebar.selectbox('Select month', ['January','February','March','June','July','August','September','October','November','December'])
-station_selected =st.sidebar.selectbox('Select your station', stations_data['Número'])
+    #date_selected= st.sidebar.date_input('When do you want to take your bike', datetime.datetime.today())
+    #time_selected= st.sidebar.time_input('At what time will you take your bike', now)
+    #day_selected =st.sidebar.selectbox('Select day', range(1,31))
+    #month_selected =st.sidebar.selectbox('Select month', ['January','February','March','June','July','August','September','October','November','December'])
 
-#show_detailed_months = st.sidebar.checkbox("Show Detailed Split per Year")
-# show_code = st.sidebar.checkbox("Show Code")
+    #predict=st.sidebar.text_input('Prueba')
 
-# # Filter Data based on selection
-# st.write(f"Filtering between {min_selection.date()} & {max_selection.date()}")
-# travel_data = travel_data[
-#     (travel_data["date"] >= min_selection) & (travel_data["date"] <= max_selection)
-# ]
-# st.write(f"Data Points: {len(travel_data)}")
 
-# Plot the GPS coordinates on the map
+    url = 'https://bicimad-xk53jytsnq-ew.a.run.app/predict'
 
-st.metric(label="Station", value=(stations_data[stations_data['Número']==station_selected]['Direccion']).values[0], delta="1.2 °F")
+    col1, col2= st.columns(2)
 
-st.map(stations_data[stations_data['Número']==station_selected])
+    with col2:
+        st.header("Map")
 
-px.scatter_geo(stations_data[stations_data['Número']==station_selected], lon='longitude',lat='latitude')
+    with col1:
+        st.header("Input")
+        date_selected= st.date_input('When do you want to take your bike', datetime.datetime.today())
+        time_selected= st.time_input('At what time will you take your bike', now)
+        station_selected =st.selectbox('Select your station', stations_data['Direccion'])
+        if st.checkbox('Locate'):
+            with col2:
+                st.map(stations_data[stations_data['Direccion']==station_selected])
+        else:
+            with col2:
+                st.map(stations_data)
 
 
 
-# if show_histograms:
-#     # Plot the histograms based on the dates of data points
-#     years = travel_data.groupby(travel_data["date"].dt.year).count().plot(kind="bar")
-#     years.set_xlabel("Year of Data Points")
-#     hist_years = years.get_figure()
-#     st.subheader("Data Split by Year")
-#     st.pyplot(hist_years)
 
-#     months = travel_data.groupby(travel_data["date"].dt.month).count().plot(kind="bar")
-#     months.set_xlabel("Month of Data Points")
-#     hist_months = months.get_figure()
-#     st.subheader("Data Split by Months")
-#     st.pyplot(hist_months)
+    selected_info=stations_data[stations_data['Direccion']==station_selected]
+    name=stations_data[stations_data['Direccion']==station_selected]
 
-#     hours = travel_data.groupby(travel_data["date"].dt.hour).count().plot(kind="bar")
-#     hours.set_xlabel("Hour of Data Points")
-#     hist_hours = hours.get_figure()
-#     st.subheader("Data Split by Hours of Day")
-#     st.pyplot(hist_hours)
+    longitude=stations_data.loc[stations_data['Direccion']==station_selected]['longitude'].values[0]
 
-# if show_detailed_months:
-#     month_year = (
-#         travel_data.groupby([travel_data["date"].dt.year, travel_data["date"].dt.month])
-#         .count()
-#         .plot(kind="bar")
-#     )
-#     month_year.set_xlabel("Month, Year of Data Points")
-#     hist_month_year = month_year.get_figure()
-#     st.subheader("Data Split by Month, Year")
-#     st.pyplot(hist_month_year)
+    latitude=stations_data.loc[stations_data['Direccion']==station_selected]['latitude'].values[0]
 
+    total_bases =stations_data.loc[stations_data['Direccion']==station_selected]['Número de Plazas'].values[0]
 
-# if show_heatmap:
-#     # Plot the heatmap using folium. It is resource intensive!
-#     # Set the map to center around Munich, Germany (48.1351, 11.5820)
-#     map_heatmap = folium.Map(location=[48.1351, 11.5820], zoom_start=11)
+    number=stations_data.loc[stations_data['Direccion']==station_selected]['Número'].values[0]
+    number=number.replace(" ", "")
+    while number=='0':
+        number=number[1:]
+    address=stations_data[stations_data['Direccion']==station_selected]['Direccion']
+    list_stations=list(stations_data['Número'])
 
-#     # Filter the DF for columns, then remove NaNs
-#     heat_df = travel_data[["latitude", "longitude"]]
-#     heat_df = heat_df.dropna(axis=0, subset=["latitude", "longitude"])
+    with col1:
+        if st.button('Predict'):
+            response = requests.get(url, params={'date': date_selected,'time':time_selected,'name':name_test})
+            # st.write(date_selected)
+            # st.write(time_selected.hour)
+            # st.write(station_selected)
+            result=float(response.json()["number_bikes"])
+            st.metric(label=f"{date} at {time.hour}:{time.minute}", value=f"{result} bikes available")
 
-#     # List comprehension to make list of lists
-#     heat_data = [
-#         [row["latitude"], row["longitude"]] for index, row in heat_df.iterrows()
-#     ]
+with tab2:
+    col1, col2,col3= st.columns(3)
 
-#     # Plot it on the map
-#     HeatMap(heat_data).add_to(map_heatmap)
+    with col1:
+        st.header("Giulia Baggio")
 
-#     # Display the map using the community component
-#     st.subheader("Heatmap")
-#     #folium_static(map_heatmap)
+    with col2:
+        st.header("Ines Morais")
 
-
-# if show_images:
-#     # Show the images from Flickr's public images
-#     st.subheader("Image Highlights")
-#     sample_data = travel_data.sample(n=images_count)
-#     urls = get_pics_from_location(sample_data, images_count)
-#     st.image(urls, width=200)
-
-
-# if show_code:
+    with col3:
+        st.header("Juan Castro")
+        st.subheader('Data Scientist')
+        image3 = Image.open('IMG_2946.jpeg')
+        st.image(image3,width=300)
+        st.markdown('https://www.linkedin.com/in/juan-castro-arias/?locale=en_US')
