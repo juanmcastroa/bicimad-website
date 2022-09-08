@@ -88,7 +88,7 @@ with tab1:
 
     result=-1
     with col1:
-        if st.button('Predict'):
+        if st.button('Let\'s check it'):
             response = requests.get(url, params={'date': date_selected,'time':time_selected,'address':station_selected})
             # st.write(date_selected)
             # st.write(time_selected.hour)
@@ -97,7 +97,7 @@ with tab1:
     if result ==0:
         st.subheader(f"❌ Unfortunately! Low probability of having a bike at {station_selected}")
     elif result >0:
-        st.subheader(f"🎉 Great! {result} bikes availableat {station_selected}")
+        st.subheader(f"🎉 Great! {result} bikes available at {station_selected}")
             # st.write(number)
             # st.write(date_selected)
             # st.write(time_selected.hour)
@@ -109,9 +109,17 @@ with tab2:
 
     with col1:
         st.header("Giulia Baggio")
+        st.subheader('Data Scientist')
+        image3 = Image.open('IMG_7183.jpg')
+        st.image(image3,width=280)
+        st.caption('https://www.linkedin.com/in/giulia-baggio')
 
     with col2:
         st.header("Ines Morais")
+        st.subheader('Data Scientist')
+        image3 = Image.open('image.png')
+        st.image(image3,width=293)
+        st.caption('https://www.linkedin.com/in/ines-moreira-silva/')
 
     with col3:
         st.header("Juan Castro")
