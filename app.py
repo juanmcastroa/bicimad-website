@@ -39,8 +39,8 @@ with tab1:
     options=['--','Address','District','Neighborhood']
 
 
-
-    url = 'https://bicimad-xk53jytsnq-ew.a.run.app/predict'
+    url='https://image-bicimad-xk53jytsnq-ew.a.run.app/predict'
+    #url = 'https://bicimad-xk53jytsnq-ew.a.run.app/predict'
 
     col1, col2= st.columns(2)
 
@@ -89,7 +89,7 @@ with tab1:
     result=-1
     with col1:
         if st.button('Predict'):
-            response = requests.get(url, params={'date': date_selected,'time':time_selected,'name':station_selected})
+            response = requests.get(url, params={'date': date_selected,'time':time_selected,'address':station_selected})
             # st.write(date_selected)
             # st.write(time_selected.hour)
             # st.write(station_selected)
