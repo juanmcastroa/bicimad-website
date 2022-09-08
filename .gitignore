@@ -1,5 +1,5 @@
 # Bicimad
-*.csv
+
 *.ipynb_checkpoints
 *.ipynb
 
