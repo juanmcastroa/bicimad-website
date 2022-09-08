@@ -136,4 +136,4 @@ with tab2:
         st.subheader('Data Scientist')
         image4 = Image.open('IMG_2946.jpeg')
         st.image(image4,width=300)
-        st.caption('https://www.linkedin.com/in/juan-castro-arias/?locale=en_US')
+        st.caption('https://www.linkedin.com/in/juan-castro-arias/')
