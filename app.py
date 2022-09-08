@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-from streamlit_folium import folium_static
 import requests
 import datetime
 from PIL import Image
