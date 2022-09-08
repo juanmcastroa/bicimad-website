@@ -84,8 +84,14 @@ with tab1:
             else:
                 with col2:
                     st.map( stations_data)
-        date_selected= st.date_input('📅 Date', datetime.datetime.today())
+
+        date_selected= st.date_input('📅 Date',datetime.datetime.today())
+        # original_title = '<p style="font-family:sans serif; color:White; font-size: 25px;"></p>'
+        # st.markdown(original_title, unsafe_allow_html=True)
         time_selected= st.time_input('⏰ Time', now)
+        # original_title = '<p style="font-family:sans serif; color:White; font-size: 25px;"></p>'
+        # st.markdown(original_title, unsafe_allow_html=True)
+
 
 
     result=-1
@@ -147,18 +153,24 @@ with tab2:
         st.subheader('Data Scientist')
         image2 = Image.open('IMG_7183.jpg')
         st.image(image2,width=280)
-        st.caption('https://www.linkedin.com/in/giulia-baggio')
+        #st.markdown('https://www.linkedin.com/in/giulia-baggio')
+        original_title = '<p style="font-family:sans serif; color:White; font-size: 16px;">https://www.linkedin.com/in/giulia-baggio</p>'
+        st.markdown(original_title, unsafe_allow_html=True)
 
     with col2:
         st.header("Ines Morais")
         st.subheader('Data Scientist')
         image3 = Image.open('image.png')
         st.image(image3,width=293)
-        st.caption('https://www.linkedin.com/in/ines-moreira-silva/')
+        #st.caption('https://www.linkedin.com/in/ines-moreira-silva/')
+        original_title = '<p style="font-family:sans serif; color:White; font-size: 16px;">https://www.linkedin.com/in/ines-moreira-silva/</p>'
+        st.markdown(original_title, unsafe_allow_html=True)
 
     with col3:
         st.header("Juan Castro")
         st.subheader('Data Scientist')
         image4 = Image.open('IMG_2946.jpeg')
         st.image(image4,width=300)
-        st.caption('https://www.linkedin.com/in/juan-castro-arias/')
+        #st.caption('https://www.linkedin.com/in/juan-castro-arias/')
+        original_title = '<p style="font-family:sans serif; color:White; font-size: 16px;">https://www.linkedin.com/in/juan-castro-arias/</p>'
+        st.markdown(original_title, unsafe_allow_html=True)
