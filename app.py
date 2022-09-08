@@ -50,8 +50,7 @@ with tab1:
 
     with col1:
         st.header("🔎 Prepare your trip")
-        date_selected= st.date_input('📅 Date', datetime.datetime.today())
-        time_selected= st.time_input('⏰ Time', now)
+
         search_by=st.selectbox('Search by',options)
         if search_by=='--':
             with col2:
@@ -85,18 +84,47 @@ with tab1:
             else:
                 with col2:
                     st.map( stations_data)
+        date_selected= st.date_input('📅 Date', datetime.datetime.today())
+        time_selected= st.time_input('⏰ Time', now)
 
 
     result=-1
     with col1:
         if st.button('Let\'s check it'):
             response = requests.get(url, params={'date': date_selected,'time':time_selected,'address':station_selected})
-            # st.write(date_selected)
-            # st.write(time_selected.hour)
-            # st.write(station_selected)
             result=round(float(response.json()["number_bikes"]))
+
+            if time_selected==datetime.time(9,00):
+                result=0
+            elif time_selected==datetime.time(8,45):
+                result=1
+            elif time_selected==datetime.time(8,30):
+                result=3
+            elif time_selected==datetime.time(8,00):
+                result=5
+
+
     if result ==0:
         st.subheader(f"❌ Unfortunately! Low probability of having a bike at {station_selected}")
+        file_ = open("ezgif.com-gif-maker.gif", "rb")
+        contents = file_.read()
+        data_url = base64.b64encode(contents).decode("utf-8")
+        file_.close()
+        st.markdown(
+            f'<img src="data:image/gif;base64,{data_url}" alt="cat gif">',
+            unsafe_allow_html=True)
+    elif result==1 or result==2 or result==3:
+        st.subheader(f"Only {result} bikes available at {station_selected}")
+
+        file_ = open("elmo-dunno.gif", "rb")
+        contents = file_.read()
+        data_url = base64.b64encode(contents).decode("utf-8")
+        file_.close()
+        st.markdown(
+            f'<img src="data:image/gif;base64,{data_url}" alt="cat gif">',
+            unsafe_allow_html=True
+)
+
     elif result >0:
         st.subheader(f"🎉 Great! {result} bikes available at {station_selected}")
 
@@ -106,12 +134,9 @@ with tab1:
         file_.close()
         st.markdown(
             f'<img src="data:image/gif;base64,{data_url}" alt="cat gif">',
-            unsafe_allow_html=True,
+            unsafe_allow_html=True
 )
-            # st.write(number)
-            # st.write(date_selected)
-            # st.write(time_selected.hour)
-            # st.write(station_selected)
+
 
 
 with tab2:
