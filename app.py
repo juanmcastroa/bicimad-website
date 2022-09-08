@@ -4,6 +4,7 @@ import requests
 import datetime
 from PIL import Image
 import numpy
+import base64
 
 #set page layout
 st.set_page_config(
@@ -98,6 +99,15 @@ with tab1:
         st.subheader(f"❌ Unfortunately! Low probability of having a bike at {station_selected}")
     elif result >0:
         st.subheader(f"🎉 Great! {result} bikes available at {station_selected}")
+
+        file_ = open("giphy.gif", "rb")
+        contents = file_.read()
+        data_url = base64.b64encode(contents).decode("utf-8")
+        file_.close()
+        st.markdown(
+            f'<img src="data:image/gif;base64,{data_url}" alt="cat gif">',
+            unsafe_allow_html=True,
+)
             # st.write(number)
             # st.write(date_selected)
             # st.write(time_selected.hour)
@@ -110,8 +120,8 @@ with tab2:
     with col1:
         st.header("Giulia Baggio")
         st.subheader('Data Scientist')
-        image3 = Image.open('IMG_7183.jpg')
-        st.image(image3,width=280)
+        image2 = Image.open('IMG_7183.jpg')
+        st.image(image2,width=280)
         st.caption('https://www.linkedin.com/in/giulia-baggio')
 
     with col2:
@@ -124,6 +134,6 @@ with tab2:
     with col3:
         st.header("Juan Castro")
         st.subheader('Data Scientist')
-        image3 = Image.open('IMG_2946.jpeg')
-        st.image(image3,width=300)
+        image4 = Image.open('IMG_2946.jpeg')
+        st.image(image4,width=300)
         st.caption('https://www.linkedin.com/in/juan-castro-arias/?locale=en_US')
