@@ -14,9 +14,7 @@ import plotly.express as px
 import requests
 import datetime
 from PIL import Image
-
-
-#load_dotenv()
+import numpy
 
 #set page layout
 st.set_page_config(
@@ -38,7 +36,7 @@ tab1, tab2= st.tabs(["Product", "Team"])
 
 with tab1:
 
-    st.title("BiciMad Predictor")
+    st.title("🚲 BiciMad Predictor ")
 
 
     travel_data = load_data()
@@ -46,6 +44,8 @@ with tab1:
 
     stations_data= pd.read_csv('bases_bicimad.csv', sep=";")
     stations_data.rename(columns={'Longitud':'longitude','Latitud':'latitude'},inplace=True)
+    serie=stations_data['Direccion'].copy()
+    serie.sort_values(axis=0, ascending=True, inplace=True)
 
     # Calculate the timerange for the slider
     min_ts = travel_data["id"].min()
@@ -55,6 +55,7 @@ with tab1:
     date=now.date()
     time=now.time()
     name_test='Puerta del Sol B'
+    options=['--','Address','District','Neighborhood']
 
 
     #new_row need to be updated by information from the station
@@ -79,47 +80,83 @@ with tab1:
     col1, col2= st.columns(2)
 
     with col2:
-        st.header("Map")
+        st.header("📍 Map")
 
     with col1:
-        st.header("Input")
-        date_selected= st.date_input('When do you want to take your bike', datetime.datetime.today())
-        time_selected= st.time_input('At what time will you take your bike', now)
-        station_selected =st.selectbox('Select your station', stations_data['Direccion'])
-        if st.checkbox('Locate'):
+        st.header("🔎 Prepare your trip")
+        date_selected= st.date_input('📅 Date', datetime.datetime.today())
+        time_selected= st.time_input('⏰ Time', now)
+        search_by=st.selectbox('Search by',options)
+        if search_by=='--':
             with col2:
-                st.map(stations_data[stations_data['Direccion']==station_selected])
-        else:
-            with col2:
-                st.map(stations_data)
+                    st.map( stations_data)
+
+        elif search_by=='Neighborhood':
+            neighborhood_selected =st.selectbox('Select your neigborhood', numpy.sort(stations_data['Barrio'].unique()))
+            station_selected=st.selectbox('Select your station', stations_data[stations_data['Barrio']==neighborhood_selected]['Direccion'])
+            if st.checkbox('Locate'):
+                with col2:
+                    st.map(stations_data[stations_data['Direccion']==station_selected])
+            else:
+                with col2:
+                    st.map( stations_data)
+
+        elif search_by=='District':
+            district_selected =st.selectbox('Select your district', numpy.sort(stations_data['Distrito'].unique()))
+            neighborhood_selected=st.selectbox('Select your neigborhood', stations_data[stations_data['Distrito']==district_selected]['Barrio'].unique())
+            station_selected =st.selectbox('Select your station', stations_data[stations_data['Barrio']==neighborhood_selected]['Direccion'])
+            if st.checkbox('Locate'):
+                with col2:
+                    st.map(stations_data[stations_data['Direccion']==station_selected])
+            else:
+                with col2:
+                    st.map( stations_data)
+        elif search_by=='Address':
+            station_selected =st.selectbox('Select your station', serie)
+            if st.checkbox('Locate'):
+                with col2:
+                    st.map(stations_data[stations_data['Direccion']==station_selected])
+            else:
+                with col2:
+                    st.map( stations_data)
 
 
 
 
-    selected_info=stations_data[stations_data['Direccion']==station_selected]
-    name=stations_data[stations_data['Direccion']==station_selected]
 
-    longitude=stations_data.loc[stations_data['Direccion']==station_selected]['longitude'].values[0]
+    # selected_info=stations_data[stations_data['Direccion']==station_selected]
+    # name=stations_data[stations_data['Direccion']==station_selected]
 
-    latitude=stations_data.loc[stations_data['Direccion']==station_selected]['latitude'].values[0]
+    # longitude=stations_data.loc[stations_data['Direccion']==station_selected]['longitude'].values[0]
 
-    total_bases =stations_data.loc[stations_data['Direccion']==station_selected]['Número de Plazas'].values[0]
+    # latitude=stations_data.loc[stations_data['Direccion']==station_selected]['latitude'].values[0]
 
-    number=stations_data.loc[stations_data['Direccion']==station_selected]['Número'].values[0]
-    number=number.replace(" ", "")
-    while number=='0':
-        number=number[1:]
-    address=stations_data[stations_data['Direccion']==station_selected]['Direccion']
-    list_stations=list(stations_data['Número'])
+    # total_bases =stations_data.loc[stations_data['Direccion']==station_selected]['Número de Plazas'].values[0]
 
+    # number=stations_data.loc[stations_data['Direccion']==station_selected]['Número'].values[0]
+    # number=number.replace(" ", "")
+    # while number=='0':
+    #     number=number[1:]
+    # number_test=number
+    # address=stations_data[stations_data['Direccion']==station_selected]['Direccion']
+    # list_stations=list(stations_data['Número'])
+    result=-1
     with col1:
         if st.button('Predict'):
-            response = requests.get(url, params={'date': date_selected,'time':time_selected,'name':name_test})
+            response = requests.get(url, params={'date': date_selected,'time':time_selected,'name':station_selected})
             # st.write(date_selected)
             # st.write(time_selected.hour)
             # st.write(station_selected)
-            result=float(response.json()["number_bikes"])
-            st.metric(label=f"{date} at {time.hour}:{time.minute}", value=f"{result} bikes available")
+            result=round(float(response.json()["number_bikes"]))
+    if result ==0:
+        st.subheader(f"❌ Unfortunately! Low probability of having a bike at {station_selected}")
+    elif result >0:
+        st.subheader(f"🎉 Great! {result} bikes availableat {station_selected}")
+            # st.write(number)
+            # st.write(date_selected)
+            # st.write(time_selected.hour)
+            # st.write(station_selected)
+
 
 with tab2:
     col1, col2,col3= st.columns(3)
@@ -135,4 +172,4 @@ with tab2:
         st.subheader('Data Scientist')
         image3 = Image.open('IMG_2946.jpeg')
         st.image(image3,width=300)
-        st.markdown('https://www.linkedin.com/in/juan-castro-arias/?locale=en_US')
+        st.caption('https://www.linkedin.com/in/juan-castro-arias/?locale=en_US')
